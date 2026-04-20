@@ -6,509 +6,152 @@
     <title>🏥 Cancer QoL Data Analyst Game</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            animation: bgShift 15s ease infinite;
-        }
-
-        @keyframes bgShift {
-            0%, 100% { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
-            50% { background: linear-gradient(135deg, #764ba2 0%, #f093fb 50%, #667eea 100%); }
-        }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 1000px;
-            width: 100%;
-            overflow: hidden;
-            animation: slideIn 0.6s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .progress-container {
-            background: #f5f5f5;
-            padding: 20px 30px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        .level-text {
-            text-align: center;
-            font-size: 0.9em;
-            color: #666;
-            font-weight: 600;
-        }
-
-        .score-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .content {
-            padding: 40px 30px;
-            min-height: 500px;
-        }
-
-        .level {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .level.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .level h2 {
-            color: #667eea;
-            font-size: 2em;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 30px 0;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 15px;
-        }
-
-        .data-summary {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border-left: 5px solid #667eea;
-        }
-
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .stat-box {
-            background: linear-gradient(135deg, #667eea15, #764ba215);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .question-text {
-            font-size: 1.3em;
-            color: #333;
-            margin: 30px 0 20px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 30px 0;
-        }
-
-        .option-btn {
-            padding: 20px;
-            border: 3px solid #e0e0e0;
-            background: white;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            color: #333;
-            transition: all 0.3s ease;
-        }
-
-        .option-btn:hover {
-            border-color: #667eea;
-            background: #667eea10;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
-        }
-
-        .option-btn.selected {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-color: #667eea;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 30px;
-        }
-
-        .btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-submit:not(:disabled) {
-            opacity: 1;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-submit:not(:disabled):hover {
-            transform: scale(1.05);
-        }
-
-        .btn-next {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.3);
-        }
-
-        .btn-next:hover {
-            transform: scale(1.05);
-        }
-
-        .btn-restart {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            color: white;
-            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
-        }
-
-        .btn-restart:hover {
-            transform: scale(1.05);
-        }
-
-        .feedback {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1.1em;
-            text-align: center;
-            display: none;
-        }
-
-        .feedback.correct {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724;
-            border: 2px solid #28a745;
-        }
-
-        .feedback.incorrect {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            color: #721c24;
-            border: 2px solid #dc3545;
-        }
-
-        .end-screen {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .end-screen .score-display {
-            font-size: 4em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 30px 0;
-        }
-
-        .end-screen .message {
-            font-size: 1.5em;
-            color: #333;
-            margin: 20px 0;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 1000px; width: 100%; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .progress-container { background: #f5f5f5; padding: 20px 30px; }
+        .progress-bar { width: 100%; height: 8px; background: #e0e0e0; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2, #f093fb); width: 0%; transition: width 0.5s ease; }
+        .level-text { text-align: center; font-size: 0.9em; color: #666; font-weight: 600; }
+        .score-badge { display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; margin-left: 10px; }
+        .content { padding: 40px 30px; min-height: 500px; }
+        .level { display: none; }
+        .level.active { display: block; }
+        .level h2 { color: #667eea; font-size: 2em; margin-bottom: 20px; text-align: center; }
+        .chart-container { position: relative; height: 300px; margin: 30px 0; padding: 20px; background: #f9f9f9; border-radius: 15px; }
+        .data-summary { background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); padding: 20px; border-radius: 15px; margin: 20px 0; border-left: 5px solid #667eea; }
+        .question-text { font-size: 1.3em; color: #333; margin: 30px 0 20px; font-weight: 600; text-align: center; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 30px 0; }
+        .option-btn { padding: 20px; border: 3px solid #e0e0e0; background: white; border-radius: 12px; cursor: pointer; font-size: 1em; font-weight: 600; color: #333; transition: all 0.3s ease; }
+        .option-btn:hover { border-color: #667eea; background: #667eea10; transform: translateY(-5px); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2); }
+        .option-btn.selected { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: #667eea; box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); }
+        .button-group { display: flex; gap: 15px; justify-content: center; margin-top: 30px; }
+        .btn-submit { padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 700; cursor: not-allowed; background: linear-gradient(135deg, #667eea, #764ba2); color: white; opacity: 0.5; transition: all 0.3s ease; }
+        .btn-submit:not(:disabled) { opacity: 1; cursor: pointer; box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3); }
+        .btn-submit:not(:disabled):hover { transform: scale(1.05); }
+        .btn-restart { padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: 700; background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; cursor: pointer; box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3); transition: all 0.3s ease; }
+        .btn-restart:hover { transform: scale(1.05); }
+        .feedback { margin-top: 20px; padding: 20px; border-radius: 12px; font-weight: 600; font-size: 1.1em; text-align: center; display: none; }
+        .feedback.correct { background: linear-gradient(135deg, #d4edda, #c3e6cb); color: #155724; border: 2px solid #28a745; }
+        .feedback.incorrect { background: linear-gradient(135deg, #f8d7da, #f5c6cb); color: #721c24; border: 2px solid #dc3545; }
+        .end-screen { text-align: center; padding: 40px; }
+        .end-screen .score-display { font-size: 4em; font-weight: bold; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 30px 0; }
+        .end-screen .message { font-size: 1.5em; color: #333; margin: 20px 0; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🏥 Cancer QoL Data Analyst Game</h1>
-            <p>Explore, Analyze, Interpret Quality of Life Data</p>
-        </div>
-
+        <div class="header"><h1>🏥 Cancer QoL Data Analyst Game</h1></div>
         <div class="progress-container">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div class="level-text">
-                <span id="levelInfo">Level 1 of 4</span>
-                <span class="score-badge">Score: <span id="score">0</span>/45</span>
-            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="level-text"><span id="levelInfo">Level 1 of 4</span><span class="score-badge">Score: <span id="score">0</span>/45</span></div>
         </div>
-
         <div class="content">
-            <!-- Level 1 -->
             <div id="level-1" class="level active">
                 <h2>📊 Level 1: Data Cleaning</h2>
-                <div class="data-summary">
-                    <strong>Dataset: 60 patients | Missing: 6 records</strong>
-                </div>
-                <div class="stat-grid">
-                    <div class="stat-box"><div class="stat-value">8</div>Missing Physical</div>
-                    <div class="stat-box"><div class="stat-value">7</div>Missing Emotional</div>
-                    <div class="stat-box"><div class="stat-value">6</div>Missing Fatigue</div>
-                    <div class="stat-box"><div class="stat-value">5</div>Missing Pain</div>
-                </div>
+                <div class="data-summary"><strong>Dataset: 60 patients | Missing: 6 records</strong></div>
                 <div class="question-text">❓ Safest first step for handling missing QoL values?</div>
-                <div class="options">
-                    <button class="option-btn" onclick="selectOption(1)">✓ Drop records with missing</button>
-                    <button class="option-btn" onclick="selectOption(2)">📊 Impute with zeros</button>
+                <div class="options" id="opts-1">
+                    <button class="option-btn" data-value="1">✓ Drop records</button>
+                    <button class="option-btn" data-value="2">📊 Impute zeros</button>
                 </div>
-                <div class="button-group">
-                    <button class="btn btn-submit" id="submitBtn" onclick="submitLevel(1)" disabled>Submit Answer</button>
-                </div>
-                <div class="feedback" id="feedback"></div>
+                <div class="button-group"><button class="btn-submit" id="submit-1" disabled>Submit</button></div>
+                <div class="feedback" id="fb-1"></div>
             </div>
-
-            <!-- Level 2 -->
             <div id="level-2" class="level">
                 <h2>📈 Level 2: Visualization</h2>
-                <div class="chart-container">
-                    <canvas id="histogramChart"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="histogramChart"></canvas></div>
                 <div class="question-text">❓ Best visualization for QoL distribution?</div>
-                <div class="options">
-                    <button class="option-btn" onclick="selectOption(1)">📊 Histogram</button>
-                    <button class="option-btn" onclick="selectOption(2)">📦 Boxplot</button>
+                <div class="options" id="opts-2">
+                    <button class="option-btn" data-value="1">📊 Histogram</button>
+                    <button class="option-btn" data-value="2">📦 Boxplot</button>
                 </div>
-                <div class="button-group">
-                    <button class="btn btn-submit" id="submitBtn" onclick="submitLevel(2)" disabled>Submit Answer</button>
-                </div>
-                <div class="feedback" id="feedback"></div>
+                <div class="button-group"><button class="btn-submit" id="submit-2" disabled>Submit</button></div>
+                <div class="feedback" id="fb-2"></div>
             </div>
-
-            <!-- Level 3 -->
             <div id="level-3" class="level">
                 <h2>🔍 Level 3: Interpretation</h2>
-                <div class="data-summary">
-                    <strong>QoL Stats: Mean=68.5, Median=69, Avg Pain=24</strong>
-                </div>
+                <div class="data-summary"><strong>QoL Stats: Mean=68.5, Median=69, Avg Pain=24</strong></div>
                 <div class="question-text">❓ What does this indicate?</div>
-                <div class="options">
-                    <button class="option-btn" onclick="selectOption(1)">✓ QoL is good, pain is concern</button>
-                    <button class="option-btn" onclick="selectOption(2)">✗ Patients feel very poor</button>
+                <div class="options" id="opts-3">
+                    <button class="option-btn" data-value="1">✓ QoL good, pain concern</button>
+                    <button class="option-btn" data-value="2">✗ Patients feel poor</button>
                 </div>
-                <div class="button-group">
-                    <button class="btn btn-submit" id="submitBtn" onclick="submitLevel(3)" disabled>Submit Answer</button>
-                </div>
-                <div class="feedback" id="feedback"></div>
+                <div class="button-group"><button class="btn-submit" id="submit-3" disabled>Submit</button></div>
+                <div class="feedback" id="fb-3"></div>
             </div>
-
-            <!-- Level 4 -->
             <div id="level-4" class="level">
                 <h2>🔬 Level 4: Factor Analysis</h2>
-                <div class="chart-container">
-                    <canvas id="comparisonChart"></canvas>
+                <div class="chart-container"><canvas id="comparisonChart"></canvas></div>
+                <div class="question-text">❓ Which factor is associated with poor QoL?</div>
+                <div class="options" id="opts-4">
+                    <button class="option-btn" data-value="1">✓ Higher stage = lower</button>
+                    <button class="option-btn" data-value="2">✗ Radiation helps</button>
                 </div>
-                <div class="question-text">❓ Which factor is most associated with poor QoL?</div>
-                <div class="options">
-                    <button class="option-btn" onclick="selectOption(1)">✓ Higher stage = lower QoL</button>
-                    <button class="option-btn" onclick="selectOption(2)">✗ Radiation always helps</button>
-                </div>
-                <div class="button-group">
-                    <button class="btn btn-submit" id="submitBtn" onclick="submitLevel(4)" disabled>Submit Answer</button>
-                </div>
-                <div class="feedback" id="feedback"></div>
+                <div class="button-group"><button class="btn-submit" id="submit-4" disabled>Submit</button></div>
+                <div class="feedback" id="fb-4"></div>
             </div>
-
-            <!-- End Screen -->
             <div id="end-screen" class="level end-screen">
                 <h2>🎉 Game Complete!</h2>
                 <div class="score-display" id="finalScore">0/45</div>
                 <div class="message" id="finalMessage"></div>
-                <div class="button-group">
-                    <button class="btn btn-restart" onclick="location.reload()">🔄 Play Again</button>
-                </div>
+                <div class="button-group"><button class="btn-restart" onclick="location.reload()">🔄 Play Again</button></div>
             </div>
         </div>
     </div>
-
     <script>
-        let currentLevel = 1;
-        let score = 0;
-        let selectedAnswer = null;
+        let currentLevel = 1, score = 0, selected = {};
 
-        function selectOption(num) {
-            selectedAnswer = num;
-            document.querySelectorAll('.option-btn').forEach((btn, idx) => {
-                btn.classList.toggle('selected', idx === num - 1);
+        for(let i = 1; i <= 4; i++) {
+            document.querySelectorAll(`#opts-${i} .option-btn`).forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll(`#opts-${i} .option-btn`).forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selected[i] = this.dataset.value;
+                    document.getElementById(`submit-${i}`).disabled = false;
+                });
             });
-            document.getElementById('submitBtn').disabled = false;
+            
+            document.getElementById(`submit-${i}`).addEventListener('click', () => submitLevel(i));
         }
 
         function submitLevel(level) {
-            const feedback = document.getElementById('feedback');
-            let correct = (level === 1 && selectedAnswer === 1) ||
-                         (level === 2 && selectedAnswer === 1) ||
-                         (level === 3 && selectedAnswer === 1) ||
-                         (level === 4 && selectedAnswer === 1);
-
-            if (correct) {
-                feedback.textContent = '✅ Correct!';
-                feedback.className = 'feedback correct';
-                score += (level === 4 ? 15 : 10);
-            } else {
-                feedback.textContent = '❌ Try again!';
-                feedback.className = 'feedback incorrect';
-                score += (level === 4 ? 7 : 5);
-            }
-
-            feedback.style.display = 'block';
+            const correct = selected[level] === '1';
+            const fb = document.getElementById(`fb-${level}`);
+            fb.textContent = correct ? '✅ Correct!' : '❌ Incorrect!';
+            fb.className = 'feedback ' + (correct ? 'correct' : 'incorrect');
+            fb.style.display = 'block';
+            score += correct ? (level === 4 ? 15 : 10) : (level === 4 ? 7 : 5);
             document.getElementById('score').textContent = score;
 
             setTimeout(() => {
                 currentLevel++;
-                if (currentLevel <= 4) {
-                    showLevel(currentLevel);
-                    if (currentLevel === 2) drawHistogram();
-                    if (currentLevel === 4) drawComparison();
-                } else {
-                    endGame();
-                }
+                if(currentLevel <= 4) {
+                    document.querySelectorAll('.level').forEach(l => l.classList.remove('active'));
+                    document.getElementById(`level-${currentLevel}`).classList.add('active');
+                    document.getElementById('levelInfo').textContent = `Level ${currentLevel} of 4`;
+                    document.getElementById('progressFill').style.width = `${(currentLevel-1)*25}%`;
+                    if(currentLevel === 2) drawHistogram();
+                    if(currentLevel === 4) drawComparison();
+                } else endGame();
             }, 2000);
         }
 
-        function showLevel(level) {
-            document.querySelectorAll('.level').forEach(l => l.classList.remove('active'));
-            document.getElementById(`level-${level}`).classList.add('active');
-            document.getElementById('levelInfo').textContent = `Level ${level} of 4`;
-            document.getElementById('progressFill').style.width = `${(level - 1) * 25}%`;
-            selectedAnswer = null;
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('feedback').style.display = 'none';
-        }
-
         function drawHistogram() {
-            const ctx = document.getElementById('histogramChart').getContext('2d');
-            new Chart(ctx, {
+            new Chart(document.getElementById('histogramChart'), {
                 type: 'bar',
-                data: {
-                    labels: ['40-50', '50-60', '60-70', '70-80', '80-90', '90-100'],
-                    datasets: [{
-                        label: 'Global QoL Distribution',
-                        data: [5, 8, 12, 18, 14, 7],
-                        backgroundColor: 'rgba(102, 126, 234, 0.7)',
-                        borderColor: '#667eea',
-                        borderWidth: 2,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
+                data: { labels: ['40-50','50-60','60-70','70-80','80-90','90-100'], datasets: [{ label: 'Global QoL', data: [5,8,12,18,14,7], backgroundColor: 'rgba(102,126,234,0.7)', borderColor: '#667eea', borderWidth: 2, borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
         }
 
         function drawComparison() {
-            const ctx = document.getElementById('comparisonChart').getContext('2d');
-            new Chart(ctx, {
+            new Chart(document.getElementById('comparisonChart'), {
                 type: 'line',
-                data: {
-                    labels: ['Stage I', 'Stage II', 'Stage III', 'Stage IV'],
-                    datasets: [{
-                        label: 'Average QoL by Stage',
-                        data: [75, 68, 62, 55],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 8,
-                        pointBackgroundColor: '#667eea'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { min: 0, max: 100 } }
-                }
+                data: { labels: ['Stage I','Stage II','Stage III','Stage IV'], datasets: [{ label: 'Avg QoL', data: [75,68,62,55], borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 8, pointBackgroundColor: '#667eea' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
             });
         }
 
@@ -516,13 +159,8 @@
             document.querySelectorAll('.level').forEach(l => l.classList.remove('active'));
             document.getElementById('end-screen').classList.add('active');
             document.getElementById('finalScore').textContent = `${score}/45`;
-            
-            let message = '';
-            if (score >= 35) message = '🌟 Excellent! You\'re a QoL expert!';
-            else if (score >= 25) message = '👍 Great job! Keep going!';
-            else message = '📚 Good start! Try again!';
-            
-            document.getElementById('finalMessage').textContent = message;
+            let msg = score >= 35 ? '🌟 Excellent!' : score >= 25 ? '👍 Great job!' : '📚 Good start!';
+            document.getElementById('finalMessage').textContent = msg;
             document.getElementById('progressFill').style.width = '100%';
         }
     </script>
