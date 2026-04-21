@@ -3,530 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏥 Cancer QoL Data Analyst Game</title>
+    <title>UF3596 CHU Cancer QoL Analytics</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            min-height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 20px;
-            animation: bgShift 20s ease infinite;
-        }
-        @keyframes bgShift {
-            0%, 100% { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
-            50% { background: linear-gradient(135deg, #764ba2 0%, #f093fb 50%, #667eea 100%); }
-        }
-        .container { 
-            background: white; 
-            border-radius: 25px; 
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
-            max-width: 1100px; 
-            width: 100%; 
-            overflow: hidden;
-            animation: slideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .header { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; 
-            padding: 50px 30px; 
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            animation: movePattern 20s linear infinite;
-        }
-        @keyframes movePattern {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(20px, 20px); }
-        }
-        .header h1 { 
-            font-size: 3.5em; 
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            letter-spacing: -1px;
-        }
-        .header p { 
-            font-size: 1.2em; 
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
-        }
-        .progress-container { 
-            background: linear-gradient(90deg, #f5f5f5 0%, #f9f9f9 100%);
-            padding: 25px 30px;
-            border-bottom: 2px solid #eee;
-        }
-        .progress-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .progress-bar { 
-            width: 100%; 
-            height: 10px; 
-            background: #e0e0e0; 
-            border-radius: 10px; 
-            overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .progress-fill { 
-            height: 100%; 
-            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
-            width: 0%; 
-            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
-        }
-        .level-text { 
-            font-size: 0.9em; 
-            color: #555; 
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        .score-badge { 
-            display: inline-block; 
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white; 
-            padding: 10px 20px; 
-            border-radius: 25px; 
-            font-weight: 700;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3); }
-            50% { box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); }
-        }
-        .content { 
-            padding: 50px 40px; 
-            min-height: 600px;
-        }
-        .level { 
-            display: none;
-            animation: fadeInScale 0.6s ease;
-        }
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .level.active { display: block; }
-        .level h2 { 
-            color: #667eea; 
-            font-size: 2.5em; 
-            margin-bottom: 25px; 
-            text-align: center;
-            text-shadow: 0 2px 5px rgba(102, 126, 234, 0.1);
-        }
-        .level-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 700;
-            margin-bottom: 20px;
-            float: right;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        .chart-container { 
-            position: relative; 
-            height: 350px; 
-            margin: 40px 0;
-            padding: 25px; 
-            background: linear-gradient(135deg, #f9f9f9, #f5f5f5);
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            border: 2px solid #f0f0f0;
-        }
-        .data-summary { 
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            padding: 25px; 
-            border-radius: 15px; 
-            margin: 20px 0; 
-            border-left: 5px solid #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-        }
-        .data-summary strong { color: #667eea; font-size: 1.1em; }
-        .stat-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 20px; 
-            margin: 25px 0;
-        }
-        .stat-box { 
-            background: linear-gradient(135deg, #667eea20, #764ba220);
-            padding: 20px; 
-            border-radius: 15px; 
-            text-align: center;
-            border: 2px solid #667eea30;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .stat-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
-            border-color: #667eea;
-        }
-        .stat-value { 
-            font-size: 2.2em; 
-            font-weight: 800; 
-            color: #667eea;
-            margin-bottom: 5px;
-        }
-        .stat-label { 
-            font-size: 0.9em; 
-            color: #666;
-            font-weight: 600;
-        }
-        .question-text { 
-            font-size: 1.4em; 
-            color: #333; 
-            margin: 35px 0 25px; 
-            font-weight: 700; 
-            text-align: center;
-            line-height: 1.6;
-        }
-        .options { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-            margin: 35px 0;
-        }
-        @media (max-width: 768px) {
-            .options { grid-template-columns: 1fr; }
-        }
-        .option-btn { 
-            padding: 25px 20px; 
-            border: 3px solid #e0e0e0; 
-            background: white; 
-            border-radius: 15px; 
-            cursor: pointer; 
-            font-size: 1.05em; 
-            font-weight: 700; 
-            color: #333;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            line-height: 1.5;
-            position: relative;
-            overflow: hidden;
-        }
-        .option-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(102, 126, 234, 0.05);
-            transition: left 0.3s ease;
-            z-index: -1;
-        }
-        .option-btn:hover::before { left: 0; }
-        .option-btn:hover { 
-            border-color: #667eea; 
-            background: #667eea08;
-            transform: translateY(-8px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.25);
-        }
-        .option-btn.selected { 
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white; 
-            border-color: #667eea;
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
-            transform: scale(1.02);
-        }
-        .button-group { 
-            display: flex; 
-            gap: 15px; 
-            justify-content: center; 
-            margin-top: 40px;
-        }
-        .btn-submit { 
-            padding: 16px 50px; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 1.1em; 
-            font-weight: 700;
-            cursor: not-allowed; 
-            background: linear-gradient(135deg, #667eea, #764ba2); 
-            color: white; 
-            opacity: 0.5;
-            transition: all 0.3s ease;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-        }
-        .btn-submit:not(:disabled) { 
-            opacity: 1; 
-            cursor: pointer; 
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
-        }
-        .btn-submit:not(:disabled):hover { 
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.45);
-        }
-        .btn-submit:not(:disabled):active { transform: translateY(-1px); }
-        .btn-restart { 
-            padding: 16px 50px; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 1.1em; 
-            font-weight: 700;
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            color: white; 
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.35);
-            transition: all 0.3s ease;
-            letter-spacing: 0.5px;
-        }
-        .btn-restart:hover { 
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(79, 172, 254, 0.45);
-        }
-        .feedback { 
-            margin-top: 25px; 
-            padding: 22px; 
-            border-radius: 12px; 
-            font-weight: 700; 
-            font-size: 1.15em; 
-            text-align: center; 
-            display: none;
-            animation: slideDown 0.5s ease;
-            letter-spacing: 0.5px;
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .feedback.correct { 
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724; 
-            border: 2px solid #28a745;
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.25);
-        }
-        .feedback.incorrect { 
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-            color: #721c24; 
-            border: 2px solid #dc3545;
-            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.25);
-        }
-        .end-screen { 
-            text-align: center; 
-            padding: 60px 40px;
-            animation: zoomIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes zoomIn {
-            from { opacity: 0; transform: scale(0.8); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .end-screen h2 { 
-            font-size: 3.5em;
-            margin-bottom: 30px;
-            animation: bounce 0.8s ease;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        .end-screen .score-display { 
-            font-size: 5.5em; 
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 30px 0;
-            letter-spacing: -2px;
-        }
-        .end-screen .message { 
-            font-size: 1.8em; 
-            color: #333; 
-            margin: 20px 0;
-            font-weight: 700;
-        }
-        .tips-box {
-            background: linear-gradient(135deg, #f9f9f9, #f5f5f5);
-            padding: 25px;
-            border-radius: 15px;
-            margin: 30px 0;
-            border: 2px solid #e0e0e0;
-            text-align: left;
-        }
-        .tips-box strong { color: #667eea; display: block; margin-bottom: 15px; font-size: 1.1em; }
-        .tips-box li { margin: 10px 0; color: #555; font-weight: 500; }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 40px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .hospital-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 20px; font-size: 0.9em; margin-top: 10px; border: 2px solid white; }
+        .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 40px; }
+        @media (max-width: 968px) { .main-content { grid-template-columns: 1fr; } }
+        .sidebar { background: #f9f9f9; padding: 30px; border-radius: 15px; }
+        .difficulty-section, .stats-section, .badges-section { margin-bottom: 30px; }
+        .difficulty-section h3, .stats-section h3, .badges-section h3 { color: #667eea; margin-bottom: 15px; font-size: 1.3em; }
+        .difficulty-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .diff-btn { padding: 12px; border: 2px solid #e0e0e0; background: white; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .diff-btn:hover { border-color: #667eea; background: #667eea10; }
+        .diff-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: #667eea; }
+        .stats-box { background: linear-gradient(135deg, #667eea15, #764ba215); padding: 20px; border-radius: 10px; margin: 10px 0; }
+        .stat-value { font-size: 2em; font-weight: 800; color: #667eea; }
+        .badges-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .badge { background: linear-gradient(135deg, #FFD700, #FFA500); color: white; padding: 8px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 700; }
+        .game-area { background: #f5f5f5; padding: 30px; border-radius: 15px; }
+        .scenario-box { background: linear-gradient(135deg, #667eea15, #764ba215); padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #667eea; }
+        .scenario-title { color: #667eea; font-weight: 700; font-size: 1.2em; margin-bottom: 10px; }
+        .game-buttons { display: grid; grid-template-columns: 1fr; gap: 15px; margin: 20px 0; }
+        .level-btn, .choice-btn { padding: 15px 20px; border: 2px solid #e0e0e0; background: white; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; text-align: left; }
+        .level-btn:hover, .choice-btn:hover { border-color: #667eea; background: #667eea10; transform: translateX(5px); }
+        .level-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: #667eea; }
+        .chart-section { background: white; padding: 25px; border-radius: 15px; margin: 20px 0; }
+        .chart-container { position: relative; height: 300px; margin: 20px 0; }
+        .feedback-box { padding: 15px; border-radius: 10px; margin: 15px 0; display: none; }
+        .feedback-correct { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+        .feedback-incorrect { background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+        .report-section { background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border: 2px solid #e0e0e0; }
+        .report-btn { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: all 0.3s; }
+        .report-btn:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(79,172,254,0.3); }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🏥 Cancer QoL Data Analyst Game</h1>
-            <p>Master Quality of Life Data Analysis</p>
+            <p>UF3596 CHU Martinique Research Unit</p>
+            <div class="hospital-badge">Official Training Platform</div>
         </div>
-        <div class="progress-container">
-            <div class="progress-info">
-                <div class="level-text">
-                    <span id="levelInfo">📍 Level 1 of 4</span>
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="difficulty-section">
+                    <h3>📍 Difficulty Level</h3>
+                    <div class="difficulty-buttons">
+                        <button class="diff-btn" onclick="selectDifficulty('easy')">🟢 Easy</button>
+                        <button class="diff-btn" onclick="selectDifficulty('normal')">🟡 Normal</button>
+                        <button class="diff-btn" onclick="selectDifficulty('hard')">🔴 Hard</button>
+                        <button class="diff-btn" onclick="selectDifficulty('expert')">⚫ Expert</button>
+                    </div>
                 </div>
-                <div class="score-badge">⭐ Score: <span id="score">0</span>/45</div>
+
+                <div class="stats-section">
+                    <h3>📊 Your Statistics</h3>
+                    <div class="stats-box">
+                        <div>Total Score</div>
+                        <div class="stat-value" id="totalScore">0</div>
+                    </div>
+                    <div class="stats-box">
+                        <div>Accuracy</div>
+                        <div class="stat-value" id="accuracy">0%</div>
+                    </div>
+                    <div class="stats-box">
+                        <div>Levels Completed</div>
+                        <div class="stat-value" id="levelCount">0/4</div>
+                    </div>
+                </div>
+
+                <div class="badges-section">
+                    <h3>🏆 Badges Earned</h3>
+                    <div class="badges-list" id="badgesList"></div>
+                </div>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-        </div>
-        <div class="content">
-            <div id="level-1" class="level active">
-                <div class="level-badge">Level 1</div>
-                <h2>📊 Data Cleaning</h2>
-                <div class="data-summary">
-                    <strong>📈 Dataset Overview:</strong><br>
-                    • Total Patients: <strong>60</strong> | Complete Records: <strong>54</strong> | Missing: <strong>6</strong>
+
+            <!-- Main Game Area -->
+            <div class="game-area">
+                <!-- Level Selection -->
+                <div id="levelSelection">
+                    <h3>Select Your Challenge</h3>
+                    <div class="game-buttons">
+                        <button class="level-btn" onclick="startLevel(1)">
+                            <strong>Level 1: Data Detective 🔍</strong>
+                            <p>Find and handle missing data (Easy → Expert)</p>
+                        </button>
+                        <button class="level-btn" onclick="startLevel(2)">
+                            <strong>Level 2: Visualization Expert 📈</strong>
+                            <p>Choose the right charts to tell the story</p>
+                        </button>
+                        <button class="level-btn" onclick="startLevel(3)">
+                            <strong>Level 3: Statistical Analyst 📊</strong>
+                            <p>Select appropriate statistical tests</p>
+                        </button>
+                        <button class="level-btn" onclick="startLevel(4)">
+                            <strong>Level 4: Research Scientist 🔬</strong>
+                            <p>Make critical research decisions</p>
+                        </button>
+                    </div>
                 </div>
-                <div class="stat-grid">
-                    <div class="stat-box"><div class="stat-value">8</div><div class="stat-label">Missing Physical</div></div>
-                    <div class="stat-box"><div class="stat-value">7</div><div class="stat-label">Missing Emotional</div></div>
-                    <div class="stat-box"><div class="stat-value">6</div><div class="stat-label">Missing Fatigue</div></div>
-                    <div class="stat-box"><div class="stat-value">5</div><div class="stat-label">Missing Pain</div></div>
+
+                <!-- Level 1: Data Cleaning -->
+                <div id="level1" class="hidden">
+                    <div class="scenario-box">
+                        <div class="scenario-title">📋 Mission: Clean Patient Quality of Life Data</div>
+                        <p>You have a dataset with 60 cancer patients. Some records have missing values. Your task: decide how to handle them.</p>
+                    </div>
+                    <div class="chart-section">
+                        <h4>📊 Data Quality Report</h4>
+                        <div class="chart-container"><canvas id="chart1"></canvas></div>
+                    </div>
+                    <div class="game-buttons">
+                        <button class="choice-btn" onclick="chooseAction(1, 1, 'drop')">✓ Drop incomplete records (conservative approach)</button>
+                        <button class="choice-btn" onclick="chooseAction(1, 2, 'impute')">⚠️ Impute missing values with mean</button>
+                        <button class="choice-btn" onclick="chooseAction(1, 3, 'forward')">❌ Use forward fill method</button>
+                    </div>
+                    <div class="feedback-box" id="feedback1"></div>
+                    <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
                 </div>
-                <div class="question-text">❓ What's the safest first step for handling missing QoL values?</div>
-                <div class="options" id="opts-1">
-                    <button class="option-btn" data-value="1">✓ Drop incomplete records</button>
-                    <button class="option-btn" data-value="2">⚠️ Impute with mean values</button>
+
+                <!-- Level 2: Visualization -->
+                <div id="level2" class="hidden">
+                    <div class="scenario-box">
+                        <div class="scenario-title">📊 Mission: Visualize QoL Trends</div>
+                        <p>Your cleaned data shows QoL scores across 4 cancer stages. Which visualization best communicates this?</p>
+                    </div>
+                    <div class="chart-section">
+                        <h4>📈 Quality of Life Scores by Stage</h4>
+                        <div class="chart-container"><canvas id="chart2"></canvas></div>
+                    </div>
+                    <div class="game-buttons">
+                        <button class="choice-btn" onclick="chooseAction(2, 1, 'line')">✓ Line chart (shows trends clearly)</button>
+                        <button class="choice-btn" onclick="chooseAction(2, 2, 'pie')">❌ Pie chart (not for this data)</button>
+                        <button class="choice-btn" onclick="chooseAction(2, 3, 'scatter')">⚠️ Scatter plot (less clear)</button>
+                    </div>
+                    <div class="feedback-box" id="feedback2"></div>
+                    <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
                 </div>
-                <div class="button-group"><button class="btn-submit" id="submit-1" disabled>Submit Answer</button></div>
-                <div class="feedback" id="fb-1"></div>
-            </div>
-            <div id="level-2" class="level">
-                <div class="level-badge">Level 2</div>
-                <h2>📈 Visualization</h2>
-                <div class="chart-container"><canvas id="histogramChart"></canvas></div>
-                <div class="question-text">❓ Which chart best shows QoL score distribution?</div>
-                <div class="options" id="opts-2">
-                    <button class="option-btn" data-value="1">📊 Histogram</button>
-                    <button class="option-btn" data-value="2">📦 Box Plot</button>
+
+                <!-- Level 3: Statistical Analysis -->
+                <div id="level3" class="hidden">
+                    <div class="scenario-box">
+                        <div class="scenario-title">📊 Mission: Choose Statistical Test</div>
+                        <p>You need to test if QoL differs significantly between treatment groups. What test would you use?</p>
+                    </div>
+                    <div class="game-buttons">
+                        <button class="choice-btn" onclick="chooseAction(3, 1, 'ttest')">✓ Independent t-test (compares means)</button>
+                        <button class="choice-btn" onclick="chooseAction(3, 2, 'chi')">⚠️ Chi-square test (for categorical)</button>
+                        <button class="choice-btn" onclick="chooseAction(3, 3, 'correlation')">❌ Correlation test (wrong application)</button>
+                    </div>
+                    <div class="feedback-box" id="feedback3"></div>
+                    <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
                 </div>
-                <div class="button-group"><button class="btn-submit" id="submit-2" disabled>Submit Answer</button></div>
-                <div class="feedback" id="fb-2"></div>
-            </div>
-            <div id="level-3" class="level">
-                <div class="level-badge">Level 3</div>
-                <h2>🔍 Interpretation</h2>
-                <div class="data-summary">
-                    <strong>📊 Statistical Summary:</strong><br>
-                    Mean QoL: <strong>68.5</strong> | Median: <strong>69</strong> | Average Pain: <strong>24</strong>
+
+                <!-- Level 4: Research Decisions -->
+                <div id="level4" class="hidden">
+                    <div class="scenario-box">
+                        <div class="scenario-title">🔬 Mission: Interpret Results & Make Recommendations</div>
+                        <p>Your analysis shows QoL declines with cancer stage (p < 0.001). You need to present findings to the research team. What's your conclusion?</p>
+                    </div>
+                    <div class="game-buttons">
+                        <button class="choice-btn" onclick="chooseAction(4, 1, 'correct')">✓ Advanced cancer stages significantly reduce QoL - recommend early intervention</button>
+                        <button class="choice-btn" onclick="chooseAction(4, 2, 'wrong')">❌ Cancer stage has no impact on QoL</button>
+                        <button class="choice-btn" onclick="chooseAction(4, 3, 'biased')">⚠️ All patients should receive same treatment regardless of stage</button>
+                    </div>
+                    <div class="feedback-box" id="feedback4"></div>
+                    <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
                 </div>
-                <div class="question-text">❓ What does this data indicate about patient outcomes?</div>
-                <div class="options" id="opts-3">
-                    <button class="option-btn" data-value="1">✓ Moderate QoL with manageable pain</button>
-                    <button class="option-btn" data-value="2">✗ Severe suffering across all patients</button>
+
+                <!-- Research Report -->
+                <div id="reportSection" class="hidden">
+                    <div class="report-section">
+                        <h3>📋 Your Research Report</h3>
+                        <div id="reportContent" style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 15px 0;"></div>
+                        <button class="report-btn" onclick="downloadReport()">📥 Download Report</button>
+                        <button class="report-btn" onclick="playAgain()">🔄 Play Again</button>
+                    </div>
                 </div>
-                <div class="button-group"><button class="btn-submit" id="submit-3" disabled>Submit Answer</button></div>
-                <div class="feedback" id="fb-3"></div>
-            </div>
-            <div id="level-4" class="level">
-                <div class="level-badge">Level 4</div>
-                <h2>🔬 Factor Analysis</h2>
-                <div class="chart-container"><canvas id="comparisonChart"></canvas></div>
-                <div class="question-text">❓ Which clinical factor most impacts QoL?</div>
-                <div class="options" id="opts-4">
-                    <button class="option-btn" data-value="1">✓ Advanced cancer stage</button>
-                    <button class="option-btn" data-value="2">✗ Patient's initial age</button>
-                </div>
-                <div class="button-group"><button class="btn-submit" id="submit-4" disabled>Submit Answer</button></div>
-                <div class="feedback" id="fb-4"></div>
-            </div>
-            <div id="end-screen" class="level end-screen">
-                <h2>🎉 Congratulations!</h2>
-                <div class="score-display" id="finalScore">0/45</div>
-                <div class="message" id="finalMessage"></div>
-                <div class="tips-box">
-                    <strong>🎓 Next Steps in Your QoL Research Journey:</strong>
-                    <ul>
-                        <li>📚 Explore advanced statistical methods like ANOVA and regression</li>
-                        <li>🔍 Dive deeper into patient subgroup analysis</li>
-                        <li>💡 Apply these skills to real cancer registry data</li>
-                        <li>🤝 Join epidemiology or oncology research teams</li>
-                    </ul>
-                </div>
-                <div class="button-group"><button class="btn-restart" onclick="location.reload()">🔄 Play Again</button></div>
             </div>
         </div>
     </div>
 
     <script>
-        let currentLevel = 1, score = 0, selected = {};
-        for(let i = 1; i <= 4; i++) {
-            document.querySelectorAll(`#opts-${i} .option-btn`).forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll(`#opts-${i} .option-btn`).forEach(b => b.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selected[i] = this.dataset.value;
-                    document.getElementById(`submit-${i}`).disabled = false;
-                });
-            });
-            document.getElementById(`submit-${i}`).addEventListener('click', () => submitLevel(i));
+        let gameState = {
+            difficulty: 'normal',
+            currentLevel: 0,
+            score: 0,
+            correctAnswers: 0,
+            totalAnswers: 0,
+            badges: [],
+            decisions: []
+        };
+
+        function selectDifficulty(diff) {
+            gameState.difficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
         }
-        function submitLevel(level) {
-            const correct = selected[level] === '1';
-            const fb = document.getElementById(`fb-${level}`);
-            fb.textContent = correct ? '✅ Excellent! That\'s the correct approach!' : '❌ Not quite. Consider the data integrity first.';
-            fb.className = 'feedback ' + (correct ? 'correct' : 'incorrect');
-            fb.style.display = 'block';
-            score += correct ? (level === 4 ? 15 : 10) : (level === 4 ? 7 : 5);
-            document.getElementById('score').textContent = score;
+
+        function startLevel(level) {
+            gameState.currentLevel = level;
+            document.getElementById('levelSelection').classList.add('hidden');
+            document.getElementById(`level${level}`).classList.remove('hidden');
+            
+            if(level === 1) drawMissingDataChart();
+            if(level === 2) drawQoLTrendChart();
+        }
+
+        function chooseAction(level, choice, action) {
+            const correct = (level === 1 && action === 'drop') || 
+                          (level === 2 && action === 'line') ||
+                          (level === 3 && action === 'ttest') ||
+                          (level === 4 && action === 'correct');
+            
+            const feedbackDiv = document.getElementById(`feedback${level}`);
+            feedbackDiv.style.display = 'block';
+            
+            if(correct) {
+                gameState.score += level === 4 ? 15 : 10;
+                gameState.correctAnswers++;
+                feedbackDiv.innerHTML = '✅ <strong>Excellent Decision!</strong> You chose the scientifically sound approach.';
+                feedbackDiv.className = 'feedback-box feedback-correct';
+                
+                if(gameState.correctAnswers === 4) {
+                    addBadge('Expert Analyst 🏆');
+                }
+            } else {
+                gameState.score += level === 4 ? 5 : 3;
+                feedbackDiv.innerHTML = '❌ <strong>Learning Moment:</strong> Consider the scientific principles. Your choice could lead to biased conclusions.';
+                feedbackDiv.className = 'feedback-box feedback-incorrect';
+            }
+            
+            gameState.totalAnswers++;
+            updateStats();
+            
             setTimeout(() => {
-                currentLevel++;
-                if(currentLevel <= 4) {
-                    document.querySelectorAll('.level').forEach(l => l.classList.remove('active'));
-                    document.getElementById(`level-${currentLevel}`).classList.add('active');
-                    document.getElementById('levelInfo').textContent = `📍 Level ${currentLevel} of 4`;
-                    document.getElementById('progressFill').style.width = `${(currentLevel-1)*25}%`;
-                    if(currentLevel === 2) drawHistogram();
-                    if(currentLevel === 4) drawComparison();
-                } else endGame();
+                document.getElementById(`level${level}`).classList.add('hidden');
+                if(level < 4) {
+                    startLevel(level + 1);
+                } else {
+                    generateReport();
+                }
             }, 2500);
         }
-        function drawHistogram() {
-            new Chart(document.getElementById('histogramChart'), {
+
+        function updateStats() {
+            document.getElementById('totalScore').textContent = gameState.score;
+            document.getElementById('accuracy').textContent = gameState.totalAnswers > 0 ? 
+                Math.round((gameState.correctAnswers / gameState.totalAnswers) * 100) + '%' : '0%';
+            document.getElementById('levelCount').textContent = gameState.currentLevel + '/4';
+        }
+
+        function addBadge(badge) {
+            if(!gameState.badges.includes(badge)) {
+                gameState.badges.push(badge);
+                const badgesList = document.getElementById('badgesList');
+                const badgeEl = document.createElement('div');
+                badgeEl.className = 'badge';
+                badgeEl.textContent = badge;
+                badgesList.appendChild(badgeEl);
+            }
+        }
+
+        function drawMissingDataChart() {
+            new Chart(document.getElementById('chart1'), {
                 type: 'bar',
-                data: { labels: ['40-50','50-60','60-70','70-80','80-90','90-100'], datasets: [{ label: 'Global QoL Distribution', data: [5,8,12,18,14,7], backgroundColor: ['#667eea','#7b68ee','#8a6eff','#9975ff','#a882ff','#b58eff'], borderColor: '#667eea', borderWidth: 2, borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } } }, plugins: { legend: { labels: { font: { size: 12, weight: 'bold' } } } } }
+                data: {
+                    labels: ['Physical', 'Emotional', 'Fatigue', 'Pain', 'Sexual'],
+                    datasets: [{
+                        label: 'Missing Values',
+                        data: [8, 7, 6, 5, 4],
+                        backgroundColor: ['#ff6b6b', '#ff8c8c', '#ffa9a9', '#ffc6c6', '#ffe3e3'],
+                        borderColor: '#ff6b6b',
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
-        function drawComparison() {
-            new Chart(document.getElementById('comparisonChart'), {
+
+        function drawQoLTrendChart() {
+            new Chart(document.getElementById('chart2'), {
                 type: 'line',
-                data: { labels: ['Stage I','Stage II','Stage III','Stage IV'], datasets: [{ label: 'Average QoL by Stage', data: [78,68,58,48], borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', fill: true, tension: 0.5, borderWidth: 4, pointRadius: 10, pointBackgroundColor: '#667eea', pointBorderColor: 'white', pointBorderWidth: 2 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } } }, plugins: { legend: { labels: { font: { size: 12, weight: 'bold' } } } } }
+                data: {
+                    labels: ['Stage I', 'Stage II', 'Stage III', 'Stage IV'],
+                    datasets: [{
+                        label: 'Average QoL Score',
+                        data: [78, 68, 58, 48],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102,126,234,0.1)',
+                        fill: true,
+                        tension: 0.5,
+                        borderWidth: 3,
+                        pointRadius: 8,
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
             });
         }
-        function endGame() {
-            document.querySelectorAll('.level').forEach(l => l.classList.remove('active'));
-            document.getElementById('end-screen').classList.add('active');
-            document.getElementById('finalScore').textContent = `${score}/45`;
-            let msg = score >= 40 ? '🌟 Outstanding! You\'re a data analysis expert!' : score >= 30 ? '🎯 Great work! You understand QoL research!' : '📚 Good effort! Keep learning!';
-            document.getElementById('finalMessage').textContent = msg;
-            document.getElementById('progressFill').style.width = '100%';
+
+        function generateReport() {
+            const reportHTML = `
+                <h4>📊 Research Study Report</h4>
+                <p><strong>Institution:</strong> UF3596 CHU Martinique</p>
+                <p><strong>Study Title:</strong> Quality of Life Analysis in Cancer Patients</p>
+                <p><strong>Difficulty Level:</strong> ${gameState.difficulty.toUpperCase()}</p>
+                <p><strong>Final Score:</strong> ${gameState.score}/45 points</p>
+                <p><strong>Accuracy:</strong> ${Math.round((gameState.correctAnswers / gameState.totalAnswers) * 100)}%</p>
+                <p><strong>Key Findings:</strong></p>
+                <ul>
+                    <li>Successfully cleaned cancer QoL dataset</li>
+                    <li>Identified visualization trends showing stage-dependent QoL decline</li>
+                    <li>Applied appropriate statistical methods</li>
+                    <li>Made evidence-based research recommendations</li>
+                </ul>
+                <p><strong>Recommendation:</strong> ${gameState.score >= 40 ? 'Ready for independent research!' : 'Continue building analytical skills'}</p>
+                <p><strong>Badges Earned:</strong> ${gameState.badges.join(', ')}</p>
+            `;
+            
+            document.getElementById('reportContent').innerHTML = reportHTML;
+            document.getElementById('levelSelection').classList.add('hidden');
+            document.getElementById('reportSection').classList.remove('hidden');
+        }
+
+        function downloadReport() {
+            alert('Report downloaded! (In production: generates PDF)');
+        }
+
+        function backToLevel() {
+            document.getElementById('levelSelection').classList.remove('hidden');
+            for(let i = 1; i <= 4; i++) {
+                document.getElementById(`level${i}`).classList.add('hidden');
+            }
+            document.getElementById('reportSection').classList.add('hidden');
+        }
+
+        function playAgain() {
+            gameState = {
+                difficulty: 'normal',
+                currentLevel: 0,
+                score: 0,
+                correctAnswers: 0,
+                totalAnswers: 0,
+                badges: [],
+                decisions: []
+            };
+            updateStats();
+            document.getElementById('badgesList').innerHTML = '';
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            backToLevel();
         }
     </script>
 </body>
