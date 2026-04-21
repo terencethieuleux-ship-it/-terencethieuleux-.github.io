@@ -1,195 +1,509 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QoL Game</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body { font-family: Poppins, sans-serif; background: linear-gradient(135deg,#667eea,#764ba2,#f093fb); padding:20px;}
-.container { background:white; border-radius:20px; overflow:hidden;}
-.header { color:white; padding:40px; text-align:center; background:linear-gradient(135deg,#667eea,#764ba2);}
-.hospital-badge {border:2px solid white; padding:8px 16px; border-radius:20px; display:inline-block;}
-.hidden {display:none;}
-.choice-btn,.diff-btn{padding:12px; margin:5px; cursor:pointer;}
-.feedback-box{margin-top:10px; padding:10px; display:none;}
-.feedback-correct{background:#d4edda;}
-.feedback-incorrect{background:#f8d7da;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UF3596 CHU Cancer QoL Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 40px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .hospital-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 20px; font-size: 0.9em; margin-top: 10px; border: 2px solid white; }
+        .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 40px; }
+        @media (max-width: 968px) { .main-content { grid-template-columns: 1fr; } }
+        .sidebar { background: #f9f9f9; padding: 30px; border-radius: 15px; }
+        .difficulty-section, .stats-section, .badges-section { margin-bottom: 30px; }
+        .difficulty-section h3, .stats-section h3, .badges-section h3 { color: #667eea; margin-bottom: 15px; font-size: 1.3em; }
+        .difficulty-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .diff-btn { padding: 12px; border: 2px solid #e0e0e0; background: white; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .diff-btn:hover { border-color: #667eea; background: #667eea10; }
+        .diff-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: #667eea; }
+        .stats-box { background: linear-gradient(135deg, #667eea15, #764ba215); padding: 20px; border-radius: 10px; margin: 10px 0; }
+        .stat-value { font-size: 2em; font-weight: 800; color: #667eea; }
+        .badges-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .badge { background: linear-gradient(135deg, #FFD700, #FFA500); color: white; padding: 8px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 700; }
+        .game-area { background: #f5f5f5; padding: 30px; border-radius: 15px; }
+        .scenario-box { background: linear-gradient(135deg, #667eea15, #764ba215); padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #667eea; }
+        .scenario-title { color: #667eea; font-weight: 700; font-size: 1.2em; margin-bottom: 10px; }
+        .game-buttons { display: grid; grid-template-columns: 1fr; gap: 15px; margin: 20px 0; }
+        .level-btn, .choice-btn { padding: 15px 20px; border: 2px solid #e0e0e0; background: white; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; text-align: left; }
+        .level-btn:hover, .choice-btn:hover { border-color: #667eea; background: #667eea10; transform: translateX(5px); }
+        .level-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: #667eea; }
+        .choice-btn { padding: 15px 20px; }
+        .chart-section { background: white; padding: 25px; border-radius: 15px; margin: 20px 0; }
+        .chart-container { position: relative; height: 300px; margin: 20px 0; }
+        .feedback-box { padding: 15px; border-radius: 10px; margin: 15px 0; display: none; font-weight: 600; }
+        .feedback-correct { background: #d4edda; color: #155724; border: 2px solid #28a745; }
+        .feedback-incorrect { background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
+        .report-section { background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border: 2px solid #e0e0e0; }
+        .report-btn { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: all 0.3s; }
+        .report-btn:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(79,172,254,0.3); }
+        .hidden { display: none !important; }
+    </style>
 </head>
-
 <body>
-<div class="container">
-<div class="header">
-<h1>QoL Analyst Game</h1>
-<div class="hospital-badge">Non official training platform</div>
-</div>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Cancer QoL Data Analyst Game</h1>
+            <p>UF3596 CHU Martinique Research Unit</p>
+            <div class="hospital-badge">Non Official Training Platform</div>
+        </div>
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="difficulty-section">
+                    <h3>📍 Difficulty Level</h3>
+                    <div class="difficulty-buttons">
+                        <button class="diff-btn" onclick="selectDifficulty(event, 'easy')">🟢 Easy</button>
+<button class="diff-btn" onclick="selectDifficulty(event, 'normal')">🟡 Normal</button>
+<button class="diff-btn" onclick="selectDifficulty(event, 'hard')">🔴 Hard</button>
+<button class="diff-btn" onclick="selectDifficulty(event, 'expert')">⚫ Expert</button>
+                    </div>
+                </div>
 
-<div>
-<button class="diff-btn" onclick="selectDifficulty(event,'easy')">Easy</button>
-<button class="diff-btn" onclick="selectDifficulty(event,'normal')">Normal</button>
-<button class="diff-btn" onclick="selectDifficulty(event,'hard')">Hard</button>
-<button class="diff-btn" onclick="selectDifficulty(event,'expert')">Expert</button>
-</div>
+                <div class="stats-section">
+                    <h3>📊 Your Statistics</h3>
+                    <div class="stats-box">
+                        <div>Total Score</div>
+                        <div class="stat-value" id="totalScore">0</div>
+                    </div>
+                    <div class="stats-box">
+                        <div>Accuracy</div>
+                        <div class="stat-value" id="accuracy">0%</div>
+                    </div>
+                    <div class="stats-box">
+                        <div>Levels Completed</div>
+                        <div class="stat-value" id="levelCount">0/4</div>
+                    </div>
+                </div>
 
-<div id="levelSelection">
-<button onclick="startLevel(1)">Level 1</button>
-<button onclick="startLevel(2)">Level 2</button>
-<button onclick="startLevel(3)">Level 3</button>
-<button onclick="startLevel(4)">Level 4</button>
-</div>
+                <div class="badges-section">
+                    <h3>🏆 Badges Earned</h3>
+                    <div class="badges-list" id="badgesList"></div>
+                </div>
+            </div>
 
-<div id="levelContainer" class="hidden">
-<h3 id="title"></h3>
-<p id="desc"></p>
+            <!-- Main Game Area -->
+            <div class="game-area">
+                <!-- Level Selection -->
+                <div id="levelSelection">
+                    <h3>Select Your Challenge</h3>
+                    <div class="game-buttons">
+                        <button class="level-btn" onclick="startLevel(1)">
+                            <strong>Level 1: Data Detective 🔍</strong>
+                            <p>Find and handle missing data (Easy → Expert)</p>
+                        </button>
+                        <button class="level-btn" onclick="startLevel(2)">
+                            <strong>Level 2: Visualization Expert 📈</strong>
+                            <p>Choose the right charts to tell the story</p>
+                        </button>
+                        <button class="level-btn" onclick="startLevel(3)">
+                            <strong>Level 3: Statistical Analyst 📊</strong>
+                            <p>Select appropriate statistical tests</p>
+                        </button>
+                        <button class="level-btn" onclick="startLevel(4)">
+                            <strong>Level 4: Research Scientist 🔬</strong>
+                            <p>Make critical research decisions</p>
+                        </button>
+                    </div>
+                </div>
 
-<div id="chartBox" class="hidden">
-<canvas id="chart"></canvas>
-</div>
+                <!-- Level 1: Data Cleaning -->
+                <div id="level1" class="hidden">
+                    <div class="scenario-box">
+                        <div class="scenario-title" id="level1Title">📋 Mission: Clean Patient Quality of Life Data</div>
+                        <p id="level1Description">You have a dataset with 60 cancer patients. Some records have missing values. Your task: decide how to handle them.</p>
+                    </div>
+                    <div class="chart-section">
+                        <h4>📊 Data Quality Report</h4>
+                        <div class="chart-container"><canvas id="chart1"></canvas></div>
+                    </div>
+                    <div class="game-buttons" id="level1Options"></div>
+                    <div class="feedback-box" id="feedback1"></div>
+                    <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
+                </div>
 
-<div id="options"></div>
-<div id="feedback" class="feedback-box"></div>
+                <!-- Level 2: Visualization -->
+                <div id="level2" class="hidden">
+                    <div class="scenario-box">
+                        <div class="scenario-title" id="level2Title">📊 Mission: Visualize QoL Trends</div>
+                        <p id="level2Description">Your cleaned data shows QoL scores across 4 cancer stages. Which visualization best communicates this?</p>
+                    </div>
+                    <div class="chart-section">
+                        <h4>📈 Quality of Life Scores by Stage</h4>
+                        <div class="chart-container"><canvas id="chart2"></canvas></div>
+                    </div>
+                    <div class="game-buttons" id="level2Options"></div>
+                    <div class="feedback-box" id="feedback2"></div>
+                    <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
+                </div>
 
-<button onclick="back()">Back</button>
-</div>
+                <!-- Level 3: Statistical Analysis -->
+                <div id="level3" class="hidden">
+                    <div class="scenario-box">
+                        <div class="scenario-title" id="level3Title">📊 Mission: Choose Statistical Test</div>
+                        <p id="level3Description">You need to test if QoL differs significantly between treatment groups. What test would you use?</p>
+                    </div>
+                    <div class="game-buttons" id="level3Options"></div>
+                    <div class="feedback-box" id="feedback3"></div>
+                    <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
+                </div>
 
-<div id="report" class="hidden"></div>
-</div>
+                <!-- Level 4: Research Decisions -->
+                <div id="level4" class="hidden">
+                    <div class="scenario-box">
+                        <div class="scenario-title" id="level4Title">🔬 Mission: Interpret Results & Make Recommendations</div>
+                        <p id="level4Description">Your analysis shows QoL declines with cancer stage (p < 0.001). You need to present findings to the research team. What's your conclusion?</p>
+                    </div>
+                    <div class="game-buttons" id="level4Options"></div>
+                    <div class="feedback-box" id="feedback4"></div>
+                    <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
+                </div>
 
-<script>
-let gameState = {
-difficulty:'normal',
-level:0,
-score:0,
-correct:0,
-total:0
-};
+                <!-- Research Report -->
+                <div id="reportSection" class="hidden">
+                    <div class="report-section">
+                        <h3>📋 Your Research Report</h3>
+                        <div id="reportContent" style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 15px 0;"></div>
+                        <button class="report-btn" onclick="playAgain()">🔄 Play Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-const questions = {
-easy:{
-1:{title:"Missing data?",desc:"What first?",opts:[
-{text:"Check missing values",correct:true},
-{text:"Delete all",correct:false}
-]},
-2:{title:"Best chart?",desc:"QoL vs stage",opts:[
-{text:"Line chart",correct:true},
-{text:"Pie chart",correct:false}
-]},
-3:{title:"Compare 2 groups",desc:"Test?",opts:[
-{text:"t-test",correct:true},
-{text:"correlation",correct:false}
-]},
-4:{title:"Conclusion",desc:"What to do?",opts:[
-{text:"Focus advanced care",correct:true},
-{text:"Ignore data",correct:false}
-]}
-},
-hard:{
-1:{title:"MCAR handling",desc:"Best method?",opts:[
-{text:"Listwise deletion",correct:true},
-{text:"Mean imputation",correct:false}
-]},
-2:{title:"Multi variable viz",desc:"Best?",opts:[
-{text:"Facet plots",correct:true},
-{text:"Pie charts",correct:false}
-]},
-3:{title:"Non-normal data",desc:"Test?",opts:[
-{text:"Kruskal-Wallis",correct:true},
-{text:"ANOVA",correct:false}
-]},
-4:{title:"Small effect",desc:"Interpret?",opts:[
-{text:"Not clinically meaningful",correct:true},
-{text:"Act immediately",correct:false}
-]}
-}
-};
+    <script>
+        let gameState = {
+            difficulty: 'normal',
+            currentLevel: 0,
+            score: 0,
+            correctAnswers: 0,
+            totalAnswers: 0,
+            badges: [],
+            decisions: []
+        };
 
-function selectDifficulty(e,d){
-gameState.difficulty=d;
-document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
-e.currentTarget.classList.add('active');
-}
+        const questionsByDifficulty = {
+            easy: {
+                level1: {
+                    title: "📋 Mission: Identify Missing Data",
+                    description: "You have patient data with some missing values. What's the first step?",
+                    options: [
+                        { text: "Count missing values and assess the pattern", correct: true, feedback: "Good! Understanding the extent is crucial." },
+                        { text: "Delete everything and start over", correct: false, feedback: "That would waste valuable data!" }
+                    ]
+                },
+                level2: {
+                    title: "📊 Mission: Show QoL Scores Clearly",
+                    description: "You want to show how QoL changes across cancer stages. What's best?",
+                    options: [
+                        { text: "Line graph showing the trend", correct: true, feedback: "Perfect! Lines show trends effectively." },
+                        { text: "Pie chart", correct: false, feedback: "Pie charts don't show trends well." }
+                    ]
+                },
+                level3: {
+                    title: "📊 Mission: Compare Two Groups",
+                    description: "Comparing QoL between surgery and radiation patients?",
+                    options: [
+                        { text: "Use a t-test", correct: true, feedback: "Correct! T-tests compare means." },
+                        { text: "Use correlation", correct: false, feedback: "Correlation measures relationships, not group differences." }
+                    ]
+                },
+                level4: {
+                    title: "🔬 Mission: Report Findings",
+                    description: "Your data shows stage 4 cancer = lower QoL. What do you recommend?",
+                    options: [
+                        { text: "Focus supportive care on advanced stage patients", correct: true, feedback: "Excellent! Data-driven recommendations." },
+                        { text: "Ignore the findings", correct: false, feedback: "That contradicts your research!" }
+                    ]
+                }
+            },
+            normal: {
+                level1: {
+                    title: "📋 Mission: Handle Missing QoL Data Properly",
+                    description: "8% of your 60-patient dataset has missing QoL scores. How should you proceed?",
+                    options: [
+                        { text: "Delete incomplete records (conservative approach)", correct: true, feedback: "Smart choice! Maintains data integrity." },
+                        { text: "Impute with mean values", correct: false, feedback: "This can introduce bias and mask patterns." },
+                        { text: "Use forward fill method", correct: false, feedback: "Not appropriate for this data type." }
+                    ]
+                },
+                level2: {
+                    title: "📊 Mission: Visualize Stage-Dependent QoL Patterns",
+                    description: "Your data shows QoL: Stage I=78, II=68, III=58, IV=48. How to present?",
+                    options: [
+                        { text: "Line chart with markers", correct: true, feedback: "Great! Shows declining trend clearly." },
+                        { text: "Stacked bar chart", correct: false, feedback: "Not appropriate for this data." },
+                        { text: "Scatter plot", correct: false, feedback: "Less effective for ordered categories." }
+                    ]
+                },
+                level3: {
+                    title: "📊 Mission: Test Treatment Differences",
+                    description: "Testing if QoL differs between 3 treatment groups (Surgery, Radiation, Chemotherapy)?",
+                    options: [
+                        { text: "ANOVA (compares multiple groups)", correct: true, feedback: "Perfect! ANOVA handles 3+ groups." },
+                        { text: "T-test", correct: false, feedback: "T-tests only compare 2 groups." },
+                        { text: "Chi-square test", correct: false, feedback: "Chi-square is for categorical data." }
+                    ]
+                },
+                level4: {
+                    title: "🔬 Mission: Interpret Interaction Effects",
+                    description: "Analysis shows: Stage affects QoL (p<0.001) AND age interacts with stage (p=0.02). Conclusion?",
+                    options: [
+                        { text: "Age modifies stage's effect on QoL - tailor interventions", correct: true, feedback: "Excellent interpretation!" },
+                        { text: "Ignore the age interaction, focus only on stage", correct: false, feedback: "You'd miss important clinical nuance." },
+                        { text: "Stage has no real effect", correct: false, feedback: "p<0.001 clearly shows significance." }
+                    ]
+                }
+            },
+            hard: {
+                level1: {
+                    title: "📋 Mission: Address Missing Data Bias",
+                    description: "Missing data: 12% Physical, 8% Emotional, but Missing Completely At Random (MCAR). Strategy?",
+                    options: [
+                        { text: "Listwise deletion (removes entire record if any missing)", correct: true, feedback: "Good! Preserves valid comparisons with MCAR." },
+                        { text: "Multiple imputation (iterative approach)", correct: false, feedback: "Better for Missing At Random (MAR), not MCAR." },
+                        { text: "Pairwise deletion", correct: false, feedback: "Can introduce bias with unbalanced data." }
+                    ]
+                },
+                level2: {
+                    title: "📊 Mission: Compare Distributions Across Subgroups",
+                    description: "Need to show QoL distribution BY stage AND treatment type. Best approach?",
+                    options: [
+                        { text: "Grouped/faceted line plots", correct: true, feedback: "Perfect! Shows interactions clearly." },
+                        { text: "Single overlay plot with 8 lines", correct: false, feedback: "Would be cluttered and hard to read." },
+                        { text: "4 separate pie charts", correct: false, feedback: "Pie charts don't show distributions well." }
+                    ]
+                },
+                level3: {
+                    title: "📊 Mission: Choose Appropriate Test with Assumptions",
+                    description: "Testing QoL differences across 4 stages. Data: non-normal, unequal variances. Test?",
+                    options: [
+                        { text: "Kruskal-Wallis (non-parametric alternative to ANOVA)", correct: true, feedback: "Excellent! Handles violations perfectly." },
+                        { text: "Regular ANOVA", correct: false, feedback: "Assumes normality and equal variance." },
+                        { text: "Linear regression", correct: false, feedback: "Assumes normal residuals." }
+                    ]
+                },
+                level4: {
+                    title: "🔬 Mission: Assess Clinical vs Statistical Significance",
+                    description: "Large sample: p<0.001 for QoL difference (Stage I: 78 vs Stage IV: 76). Recommendation?",
+                    options: [
+                        { text: "2-point difference may not be clinically meaningful despite statistical significance", correct: true, feedback: "Brilliant! You understand practical significance." },
+                        { text: "p<0.001 means implement interventions immediately", correct: false, feedback: "Need to consider effect size!" },
+                        { text: "Difference is too small to matter", correct: false, feedback: "Context and sample size matter." }
+                    ]
+                }
+            },
+            expert: {
+                level1: {
+                    title: "📋 Mission: Diagnose Missing Data Mechanism",
+                    description: "Low QoL patients skipped items → MNAR (Missing Not At Random). Mitigation?",
+                    options: [
+                        { text: "Use sensitivity analysis & pattern-mixture models", correct: true, feedback: "Advanced! You understand MNAR complexity." },
+                        { text: "Simple mean imputation", correct: false, feedback: "Dangerously biased with MNAR." },
+                        { text: "Ignore mechanism, use standard methods", correct: false, feedback: "Would violate statistical assumptions." }
+                    ]
+                },
+                level2: {
+                    title: "📊 Mission: Communicate Complex Multivariate Patterns",
+                    description: "Need to show: QoL by stage, by treatment, by age, by gender. Visualization?",
+                    options: [
+                        { text: "Heat map with facets or interactive dashboard", correct: true, feedback: "Perfect for high-dimensional data!" },
+                        { text: "Single line plot with 16 lines", correct: false, feedback: "Would be incomprehensible." },
+                        { text: "4 separate tables", correct: false, feedback: "Poor for pattern recognition." }
+                    ]
+                },
+                level3: {
+                    title: "📊 Mission: Model Longitudinal Data Appropriately",
+                    description: "QoL measured repeatedly at 0, 3, 6, 12 months in clusters (hospitals). Analysis?",
+                    options: [
+                        { text: "Mixed-effects model with random intercepts/slopes", correct: true, feedback: "Excellent! Accounts for hierarchy & repeated measures." },
+                        { text: "Simple t-tests at each timepoint", correct: false, feedback: "Ignores clustering and correlation." },
+                        { text: "Regular ANOVA", correct: false, feedback: "Violates independence assumption." }
+                    ]
+                },
+                level4: {
+                    title: "🔬 Mission: Navigate Publication Bias & Reporting",
+                    description: "Significant findings contradict prior studies. Recommendation before publication?",
+                    options: [
+                        { text: "Conduct pre-specified sensitivity analyses & report all analyses (registered report)", correct: true, feedback: "Exemplary! Addresses reproducibility crisis." },
+                        { text: "Publish only significant results to look impressive", correct: false, feedback: "Contributes to publication bias." },
+                        { text: "Hide contradictory findings", correct: false, feedback: "Scientific integrity violation!" }
+                    ]
+                }
+            }
+        };
 
-function startLevel(l){
-gameState.level=l;
+        function selectDifficulty(diff) {
+            gameState.difficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
 
-document.getElementById('levelSelection').classList.add('hidden');
-document.getElementById('levelContainer').classList.remove('hidden');
+        function startLevel(level) {
+            gameState.currentLevel = level;
+            document.getElementById('levelSelection').classList.add('hidden');
+            document.getElementById(`level${level}`).classList.remove('hidden');
+            
+            const levelQuestions = questionsByDifficulty[gameState.difficulty][`level${level}`];
+            document.getElementById(`level${level}Title`).textContent = levelQuestions.title;
+            document.getElementById(`level${level}Description`).textContent = levelQuestions.description;
+            
+            const optionsContainer = document.getElementById(`level${level}Options`);
+            optionsContainer.innerHTML = '';
+            
+            levelQuestions.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = option.text;
+                btn.onclick = () => chooseAction(level, index, option.correct, option.feedback);
+                optionsContainer.appendChild(btn);
+            });
+            
+            if(level === 1) drawMissingDataChart();
+            if(level === 2) drawQoLTrendChart();
+        }
 
-const q = questions[gameState.difficulty][l];
+        function chooseAction(level, choice, correct, feedback) {
+            const feedbackDiv = document.getElementById(`feedback${level}`);
+            feedbackDiv.style.display = 'block';
+            
+            if(correct) {
+                gameState.score += level === 4 ? 15 : 10;
+                gameState.correctAnswers++;
+                feedbackDiv.innerHTML = `<strong>${feedback}</strong>`;
+                feedbackDiv.className = 'feedback-box feedback-correct';
+                
+                if(gameState.correctAnswers === 4) {
+                    addBadge('Expert Analyst 🏆');
+                }
+            } else {
+                gameState.score += level === 4 ? 5 : 3;
+                feedbackDiv.innerHTML = `<strong>${feedback}</strong>`;
+                feedbackDiv.className = 'feedback-box feedback-incorrect';
+            }
+            
+            gameState.totalAnswers++;
+            updateStats();
+            
+            setTimeout(() => {
+                document.getElementById(`level${level}`).classList.add('hidden');
+                if(level < 4) {
+                    startLevel(level + 1);
+                } else {
+                    generateReport();
+                }
+            }, 2500);
+        }
 
-document.getElementById('title').textContent=q.title;
-document.getElementById('desc').textContent=q.desc;
+        function updateStats() {
+            document.getElementById('totalScore').textContent = gameState.score;
+            document.getElementById('accuracy').textContent = gameState.totalAnswers > 0 ? 
+                Math.round((gameState.correctAnswers / gameState.totalAnswers) * 100) + '%' : '0%';
+            document.getElementById('levelCount').textContent = gameState.currentLevel + '/4';
+        }
 
-const optDiv=document.getElementById('options');
-optDiv.innerHTML="";
+        function addBadge(badge) {
+            if(!gameState.badges.includes(badge)) {
+                gameState.badges.push(badge);
+                const badgesList = document.getElementById('badgesList');
+                const badgeEl = document.createElement('div');
+                badgeEl.className = 'badge';
+                badgeEl.textContent = badge;
+                badgesList.appendChild(badgeEl);
+            }
+        }
 
-q.opts.forEach(o=>{
-let b=document.createElement('button');
-b.className='choice-btn';
-b.textContent=o.text;
-b.onclick=()=>answer(o.correct);
-optDiv.appendChild(b);
-});
+        function drawMissingDataChart() {
+            new Chart(document.getElementById('chart1'), {
+                type: 'bar',
+                data: {
+                    labels: ['Physical', 'Emotional', 'Fatigue', 'Pain', 'Sexual'],
+                    datasets: [{
+                        label: 'Missing Values',
+                        data: [8, 7, 6, 5, 4],
+                        backgroundColor: ['#ff6b6b', '#ff8c8c', '#ffa9a9', '#ffc6c6', '#ffe3e3'],
+                        borderColor: '#ff6b6b',
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
 
-drawChart(l);
-}
+        function drawQoLTrendChart() {
+            new Chart(document.getElementById('chart2'), {
+                type: 'line',
+                data: {
+                    labels: ['Stage I', 'Stage II', 'Stage III', 'Stage IV'],
+                    datasets: [{
+                        label: 'Average QoL Score',
+                        data: [78, 68, 58, 48],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102,126,234,0.1)',
+                        fill: true,
+                        tension: 0.5,
+                        borderWidth: 3,
+                        pointRadius: 8,
+                        pointBackgroundColor: '#667eea'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+            });
+        }
 
-function answer(correct){
-let fb=document.getElementById('feedback');
-fb.style.display='block';
+        function generateReport() {
+            const difficulty = gameState.difficulty.charAt(0).toUpperCase() + gameState.difficulty.slice(1);
+            const reportHTML = `
+                <h4>📊 Research Study Report</h4>
+                <p><strong>Institution:</strong> UF3596 CHU Martinique</p>
+                <p><strong>Study Title:</strong> Quality of Life Analysis in Cancer Patients</p>
+                <p><strong>Difficulty Level:</strong> ${difficulty}</p>
+                <p><strong>Final Score:</strong> ${gameState.score}/45 points</p>
+                <p><strong>Accuracy:</strong> ${Math.round((gameState.correctAnswers / gameState.totalAnswers) * 100)}%</p>
+                <p><strong>Key Findings:</strong></p>
+                <ul>
+                    <li>Successfully cleaned cancer QoL dataset</li>
+                    <li>Identified visualization trends showing stage-dependent QoL decline</li>
+                    <li>Applied appropriate statistical methods</li>
+                    <li>Made evidence-based research recommendations</li>
+                </ul>
+                <p><strong>Recommendation:</strong> ${gameState.score >= 40 ? 'Ready for independent research!' : 'Continue building analytical skills'}</p>
+                <p><strong>Badges Earned:</strong> ${gameState.badges.length > 0 ? gameState.badges.join(', ') : 'None yet'}</p>
+            `;
+            
+            document.getElementById('reportContent').innerHTML = reportHTML;
+            document.getElementById('levelSelection').classList.add('hidden');
+            document.getElementById('reportSection').classList.remove('hidden');
+        }
 
-if(correct){
-gameState.score+=10;
-gameState.correct++;
-fb.className="feedback-box feedback-correct";
-fb.textContent="Correct decision.";
-}else{
-gameState.score+=3;
-fb.className="feedback-box feedback-incorrect";
-fb.textContent="Not optimal.";
-}
+        function backToLevel() {
+            document.getElementById('levelSelection').classList.remove('hidden');
+            for(let i = 1; i <= 4; i++) {
+                document.getElementById(`level${i}`).classList.add('hidden');
+            }
+            document.getElementById('reportSection').classList.add('hidden');
+        }
 
-gameState.total++;
-
-setTimeout(()=>{
-if(gameState.level<4) startLevel(gameState.level+1);
-else showReport();
-},1500);
-}
-
-function drawChart(l){
-let box=document.getElementById('chartBox');
-if(l===1||l===2){
-box.classList.remove('hidden');
-new Chart(document.getElementById('chart'),{
-type:l===1?'bar':'line',
-data:{
-labels:['A','B','C','D'],
-datasets:[{data:[10,20,30,40]}]
-}
-});
-}else{
-box.classList.add('hidden');
-}
-}
-
-function showReport(){
-document.getElementById('levelContainer').classList.add('hidden');
-document.getElementById('report').classList.remove('hidden');
-document.getElementById('report').innerHTML=`
-Score: ${gameState.score}<br>
-Accuracy: ${Math.round(gameState.correct/gameState.total*100)}%
-`;
-}
-
-function back(){
-document.getElementById('levelContainer').classList.add('hidden');
-document.getElementById('levelSelection').classList.remove('hidden');
-}
-</script>
-
+        function playAgain() {
+            gameState = {
+                difficulty: 'normal',
+                currentLevel: 0,
+                score: 0,
+                correctAnswers: 0,
+                totalAnswers: 0,
+                badges: [],
+                decisions: []
+            };
+            updateStats();
+            document.getElementById('badgesList').innerHTML = '';
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            backToLevel();
+        }
+    </script>
 </body>
 </html>
