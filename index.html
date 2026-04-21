@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -33,9 +33,10 @@
         .level-btn, .choice-btn { padding: 15px 20px; border: 2px solid #e0e0e0; background: white; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s; text-align: left; }
         .level-btn:hover, .choice-btn:hover { border-color: #667eea; background: #667eea10; transform: translateX(5px); }
         .level-btn.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: #667eea; }
+        .choice-btn { padding: 15px 20px; }
         .chart-section { background: white; padding: 25px; border-radius: 15px; margin: 20px 0; }
         .chart-container { position: relative; height: 300px; margin: 20px 0; }
-        .feedback-box { padding: 15px; border-radius: 10px; margin: 15px 0; display: none; }
+        .feedback-box { padding: 15px; border-radius: 10px; margin: 15px 0; display: none; font-weight: 600; }
         .feedback-correct { background: #d4edda; color: #155724; border: 2px solid #28a745; }
         .feedback-incorrect { background: #f8d7da; color: #721c24; border: 2px solid #dc3545; }
         .report-section { background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border: 2px solid #e0e0e0; }
@@ -49,7 +50,7 @@
         <div class="header">
             <h1>🏥 Cancer QoL Data Analyst Game</h1>
             <p>UF3596 CHU Martinique Research Unit</p>
-            <div class="hospital-badge">Official Training Platform</div>
+            <div class="hospital-badge">Non Official Training Platform</div>
         </div>
         <div class="main-content">
             <!-- Sidebar -->
@@ -114,18 +115,14 @@
                 <!-- Level 1: Data Cleaning -->
                 <div id="level1" class="hidden">
                     <div class="scenario-box">
-                        <div class="scenario-title">📋 Mission: Clean Patient Quality of Life Data</div>
-                        <p>You have a dataset with 60 cancer patients. Some records have missing values. Your task: decide how to handle them.</p>
+                        <div class="scenario-title" id="level1Title">📋 Mission: Clean Patient Quality of Life Data</div>
+                        <p id="level1Description">You have a dataset with 60 cancer patients. Some records have missing values. Your task: decide how to handle them.</p>
                     </div>
                     <div class="chart-section">
                         <h4>📊 Data Quality Report</h4>
                         <div class="chart-container"><canvas id="chart1"></canvas></div>
                     </div>
-                    <div class="game-buttons">
-                        <button class="choice-btn" onclick="chooseAction(1, 1, 'drop')">✓ Drop incomplete records (conservative approach)</button>
-                        <button class="choice-btn" onclick="chooseAction(1, 2, 'impute')">⚠️ Impute missing values with mean</button>
-                        <button class="choice-btn" onclick="chooseAction(1, 3, 'forward')">❌ Use forward fill method</button>
-                    </div>
+                    <div class="game-buttons" id="level1Options"></div>
                     <div class="feedback-box" id="feedback1"></div>
                     <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
                 </div>
@@ -133,18 +130,14 @@
                 <!-- Level 2: Visualization -->
                 <div id="level2" class="hidden">
                     <div class="scenario-box">
-                        <div class="scenario-title">📊 Mission: Visualize QoL Trends</div>
-                        <p>Your cleaned data shows QoL scores across 4 cancer stages. Which visualization best communicates this?</p>
+                        <div class="scenario-title" id="level2Title">📊 Mission: Visualize QoL Trends</div>
+                        <p id="level2Description">Your cleaned data shows QoL scores across 4 cancer stages. Which visualization best communicates this?</p>
                     </div>
                     <div class="chart-section">
                         <h4>📈 Quality of Life Scores by Stage</h4>
                         <div class="chart-container"><canvas id="chart2"></canvas></div>
                     </div>
-                    <div class="game-buttons">
-                        <button class="choice-btn" onclick="chooseAction(2, 1, 'line')">✓ Line chart (shows trends clearly)</button>
-                        <button class="choice-btn" onclick="chooseAction(2, 2, 'pie')">❌ Pie chart (not for this data)</button>
-                        <button class="choice-btn" onclick="chooseAction(2, 3, 'scatter')">⚠️ Scatter plot (less clear)</button>
-                    </div>
+                    <div class="game-buttons" id="level2Options"></div>
                     <div class="feedback-box" id="feedback2"></div>
                     <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
                 </div>
@@ -152,14 +145,10 @@
                 <!-- Level 3: Statistical Analysis -->
                 <div id="level3" class="hidden">
                     <div class="scenario-box">
-                        <div class="scenario-title">📊 Mission: Choose Statistical Test</div>
-                        <p>You need to test if QoL differs significantly between treatment groups. What test would you use?</p>
+                        <div class="scenario-title" id="level3Title">📊 Mission: Choose Statistical Test</div>
+                        <p id="level3Description">You need to test if QoL differs significantly between treatment groups. What test would you use?</p>
                     </div>
-                    <div class="game-buttons">
-                        <button class="choice-btn" onclick="chooseAction(3, 1, 'ttest')">✓ Independent t-test (compares means)</button>
-                        <button class="choice-btn" onclick="chooseAction(3, 2, 'chi')">⚠️ Chi-square test (for categorical)</button>
-                        <button class="choice-btn" onclick="chooseAction(3, 3, 'correlation')">❌ Correlation test (wrong application)</button>
-                    </div>
+                    <div class="game-buttons" id="level3Options"></div>
                     <div class="feedback-box" id="feedback3"></div>
                     <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
                 </div>
@@ -167,14 +156,10 @@
                 <!-- Level 4: Research Decisions -->
                 <div id="level4" class="hidden">
                     <div class="scenario-box">
-                        <div class="scenario-title">🔬 Mission: Interpret Results & Make Recommendations</div>
-                        <p>Your analysis shows QoL declines with cancer stage (p < 0.001). You need to present findings to the research team. What's your conclusion?</p>
+                        <div class="scenario-title" id="level4Title">🔬 Mission: Interpret Results & Make Recommendations</div>
+                        <p id="level4Description">Your analysis shows QoL declines with cancer stage (p < 0.001). You need to present findings to the research team. What's your conclusion?</p>
                     </div>
-                    <div class="game-buttons">
-                        <button class="choice-btn" onclick="chooseAction(4, 1, 'correct')">✓ Advanced cancer stages significantly reduce QoL - recommend early intervention</button>
-                        <button class="choice-btn" onclick="chooseAction(4, 2, 'wrong')">❌ Cancer stage has no impact on QoL</button>
-                        <button class="choice-btn" onclick="chooseAction(4, 3, 'biased')">⚠️ All patients should receive same treatment regardless of stage</button>
-                    </div>
+                    <div class="game-buttons" id="level4Options"></div>
                     <div class="feedback-box" id="feedback4"></div>
                     <button class="report-btn" onclick="backToLevel()">Back to Levels</button>
                 </div>
@@ -184,7 +169,6 @@
                     <div class="report-section">
                         <h3>📋 Your Research Report</h3>
                         <div id="reportContent" style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin: 15px 0;"></div>
-                        <button class="report-btn" onclick="downloadReport()">📥 Download Report</button>
                         <button class="report-btn" onclick="playAgain()">🔄 Play Again</button>
                     </div>
                 </div>
@@ -203,165 +187,95 @@
             decisions: []
         };
 
-        function selectDifficulty(diff) {
-            gameState.difficulty = diff;
-            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        function startLevel(level) {
-            gameState.currentLevel = level;
-            document.getElementById('levelSelection').classList.add('hidden');
-            document.getElementById(`level${level}`).classList.remove('hidden');
-            
-            if(level === 1) drawMissingDataChart();
-            if(level === 2) drawQoLTrendChart();
-        }
-
-        function chooseAction(level, choice, action) {
-            const correct = (level === 1 && action === 'drop') || 
-                          (level === 2 && action === 'line') ||
-                          (level === 3 && action === 'ttest') ||
-                          (level === 4 && action === 'correct');
-            
-            const feedbackDiv = document.getElementById(`feedback${level}`);
-            feedbackDiv.style.display = 'block';
-            
-            if(correct) {
-                gameState.score += level === 4 ? 15 : 10;
-                gameState.correctAnswers++;
-                feedbackDiv.innerHTML = '✅ <strong>Excellent Decision!</strong> You chose the scientifically sound approach.';
-                feedbackDiv.className = 'feedback-box feedback-correct';
-                
-                if(gameState.correctAnswers === 4) {
-                    addBadge('Expert Analyst 🏆');
-                }
-            } else {
-                gameState.score += level === 4 ? 5 : 3;
-                feedbackDiv.innerHTML = '❌ <strong>Learning Moment:</strong> Consider the scientific principles. Your choice could lead to biased conclusions.';
-                feedbackDiv.className = 'feedback-box feedback-incorrect';
-            }
-            
-            gameState.totalAnswers++;
-            updateStats();
-            
-            setTimeout(() => {
-                document.getElementById(`level${level}`).classList.add('hidden');
-                if(level < 4) {
-                    startLevel(level + 1);
-                } else {
-                    generateReport();
-                }
-            }, 2500);
-        }
-
-        function updateStats() {
-            document.getElementById('totalScore').textContent = gameState.score;
-            document.getElementById('accuracy').textContent = gameState.totalAnswers > 0 ? 
-                Math.round((gameState.correctAnswers / gameState.totalAnswers) * 100) + '%' : '0%';
-            document.getElementById('levelCount').textContent = gameState.currentLevel + '/4';
-        }
-
-        function addBadge(badge) {
-            if(!gameState.badges.includes(badge)) {
-                gameState.badges.push(badge);
-                const badgesList = document.getElementById('badgesList');
-                const badgeEl = document.createElement('div');
-                badgeEl.className = 'badge';
-                badgeEl.textContent = badge;
-                badgesList.appendChild(badgeEl);
-            }
-        }
-
-        function drawMissingDataChart() {
-            new Chart(document.getElementById('chart1'), {
-                type: 'bar',
-                data: {
-                    labels: ['Physical', 'Emotional', 'Fatigue', 'Pain', 'Sexual'],
-                    datasets: [{
-                        label: 'Missing Values',
-                        data: [8, 7, 6, 5, 4],
-                        backgroundColor: ['#ff6b6b', '#ff8c8c', '#ffa9a9', '#ffc6c6', '#ffe3e3'],
-                        borderColor: '#ff6b6b',
-                        borderWidth: 2
-                    }]
+        const questionsByDifficulty = {
+            easy: {
+                level1: {
+                    title: "📋 Mission: Identify Missing Data",
+                    description: "You have patient data with some missing values. What's the first step?",
+                    options: [
+                        { text: "Count missing values and assess the pattern", correct: true, feedback: "Good! Understanding the extent is crucial." },
+                        { text: "Delete everything and start over", correct: false, feedback: "That would waste valuable data!" }
+                    ]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function drawQoLTrendChart() {
-            new Chart(document.getElementById('chart2'), {
-                type: 'line',
-                data: {
-                    labels: ['Stage I', 'Stage II', 'Stage III', 'Stage IV'],
-                    datasets: [{
-                        label: 'Average QoL Score',
-                        data: [78, 68, 58, 48],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102,126,234,0.1)',
-                        fill: true,
-                        tension: 0.5,
-                        borderWidth: 3,
-                        pointRadius: 8,
-                        pointBackgroundColor: '#667eea'
-                    }]
+                level2: {
+                    title: "📊 Mission: Show QoL Scores Clearly",
+                    description: "You want to show how QoL changes across cancer stages. What's best?",
+                    options: [
+                        { text: "Line graph showing the trend", correct: true, feedback: "Perfect! Lines show trends effectively." },
+                        { text: "Pie chart", correct: false, feedback: "Pie charts don't show trends well." }
+                    ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
-            });
-        }
-
-        function generateReport() {
-            const reportHTML = `
-                <h4>📊 Research Study Report</h4>
-                <p><strong>Institution:</strong> UF3596 CHU Martinique</p>
-                <p><strong>Study Title:</strong> Quality of Life Analysis in Cancer Patients</p>
-                <p><strong>Difficulty Level:</strong> ${gameState.difficulty.toUpperCase()}</p>
-                <p><strong>Final Score:</strong> ${gameState.score}/45 points</p>
-                <p><strong>Accuracy:</strong> ${Math.round((gameState.correctAnswers / gameState.totalAnswers) * 100)}%</p>
-                <p><strong>Key Findings:</strong></p>
-                <ul>
-                    <li>Successfully cleaned cancer QoL dataset</li>
-                    <li>Identified visualization trends showing stage-dependent QoL decline</li>
-                    <li>Applied appropriate statistical methods</li>
-                    <li>Made evidence-based research recommendations</li>
-                </ul>
-                <p><strong>Recommendation:</strong> ${gameState.score >= 40 ? 'Ready for independent research!' : 'Continue building analytical skills'}</p>
-                <p><strong>Badges Earned:</strong> ${gameState.badges.join(', ')}</p>
-            `;
-            
-            document.getElementById('reportContent').innerHTML = reportHTML;
-            document.getElementById('levelSelection').classList.add('hidden');
-            document.getElementById('reportSection').classList.remove('hidden');
-        }
-
-        function downloadReport() {
-            alert('Report downloaded! (In production: generates PDF)');
-        }
-
-        function backToLevel() {
-            document.getElementById('levelSelection').classList.remove('hidden');
-            for(let i = 1; i <= 4; i++) {
-                document.getElementById(`level${i}`).classList.add('hidden');
-            }
-            document.getElementById('reportSection').classList.add('hidden');
-        }
-
-        function playAgain() {
-            gameState = {
-                difficulty: 'normal',
-                currentLevel: 0,
-                score: 0,
-                correctAnswers: 0,
-                totalAnswers: 0,
-                badges: [],
-                decisions: []
-            };
-            updateStats();
-            document.getElementById('badgesList').innerHTML = '';
-            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
-            backToLevel();
-        }
-    </script>
-</body>
-</html>
+                level3: {
+                    title: "📊 Mission: Compare Two Groups",
+                    description: "Comparing QoL between surgery and radiation patients?",
+                    options: [
+                        { text: "Use a t-test", correct: true, feedback: "Correct! T-tests compare means." },
+                        { text: "Use correlation", correct: false, feedback: "Correlation measures relationships, not group differences." }
+                    ]
+                },
+                level4: {
+                    title: "🔬 Mission: Report Findings",
+                    description: "Your data shows stage 4 cancer = lower QoL. What do you recommend?",
+                    options: [
+                        { text: "Focus supportive care on advanced stage patients", correct: true, feedback: "Excellent! Data-driven recommendations." },
+                        { text: "Ignore the findings", correct: false, feedback: "That contradicts your research!" }
+                    ]
+                }
+            },
+            normal: {
+                level1: {
+                    title: "📋 Mission: Handle Missing QoL Data Properly",
+                    description: "8% of your 60-patient dataset has missing QoL scores. How should you proceed?",
+                    options: [
+                        { text: "Delete incomplete records (conservative approach)", correct: true, feedback: "Smart choice! Maintains data integrity." },
+                        { text: "Impute with mean values", correct: false, feedback: "This can introduce bias and mask patterns." },
+                        { text: "Use forward fill method", correct: false, feedback: "Not appropriate for this data type." }
+                    ]
+                },
+                level2: {
+                    title: "📊 Mission: Visualize Stage-Dependent QoL Patterns",
+                    description: "Your data shows QoL: Stage I=78, II=68, III=58, IV=48. How to present?",
+                    options: [
+                        { text: "Line chart with markers", correct: true, feedback: "Great! Shows declining trend clearly." },
+                        { text: "Stacked bar chart", correct: false, feedback: "Not appropriate for this data." },
+                        { text: "Scatter plot", correct: false, feedback: "Less effective for ordered categories." }
+                    ]
+                },
+                level3: {
+                    title: "📊 Mission: Test Treatment Differences",
+                    description: "Testing if QoL differs between 3 treatment groups (Surgery, Radiation, Chemotherapy)?",
+                    options: [
+                        { text: "ANOVA (compares multiple groups)", correct: true, feedback: "Perfect! ANOVA handles 3+ groups." },
+                        { text: "T-test", correct: false, feedback: "T-tests only compare 2 groups." },
+                        { text: "Chi-square test", correct: false, feedback: "Chi-square is for categorical data." }
+                    ]
+                },
+                level4: {
+                    title: "🔬 Mission: Interpret Interaction Effects",
+                    description: "Analysis shows: Stage affects QoL (p<0.001) AND age interacts with stage (p=0.02). Conclusion?",
+                    options: [
+                        { text: "Age modifies stage's effect on QoL - tailor interventions", correct: true, feedback: "Excellent interpretation!" },
+                        { text: "Ignore the age interaction, focus only on stage", correct: false, feedback: "You'd miss important clinical nuance." },
+                        { text: "Stage has no real effect", correct: false, feedback: "p<0.001 clearly shows significance." }
+                    ]
+                }
+            },
+            hard: {
+                level1: {
+                    title: "📋 Mission: Address Missing Data Bias",
+                    description: "Missing data: 12% Physical, 8% Emotional, but Missing Completely At Random (MCAR). Strategy?",
+                    options: [
+                        { text: "Listwise deletion (removes entire record if any missing)", correct: true, feedback: "Good! Preserves valid comparisons with MCAR." },
+                        { text: "Multiple imputation (iterative approach)", correct: false, feedback: "Better for Missing At Random (MAR), not MCAR." },
+                        { text: "Pairwise deletion", correct: false, feedback: "Can introduce bias with unbalanced data." }
+                    ]
+                },
+                level2: {
+                    title: "📊 Mission: Compare Distributions Across Subgroups",
+                    description: "Need to show QoL distribution BY stage AND treatment type. Best approach?",
+                    options: [
+                        { text: "Grouped/faceted line plots", correct: true, feedback: "Perfect! Shows interactions clearly." },
+                        { text: "Single overlay plot with 8 lines", correct: false, feedback: "Would be cluttered and hard to read." },
+                        { text: "4 separate pie charts", correct: false, feedback: "Pie charts don't show distributions well." }
+                    ]](#)*
+
